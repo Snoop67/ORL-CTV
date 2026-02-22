@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CTV Bas Risque Checker</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 30px auto; 
+            padding: 20px; 
+            line-height: 1.5;
+        }
+        h1 { color: #333; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        select, button { 
+            padding: 8px; 
+            font-size: 16px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-sizing: border-box;
+        }
+        .checkbox-group { margin: 10px 0; }
+        .checkbox-group label { display: inline-block; margin-right: 20px; font-weight: normal; }
+        button { 
+            background: #0066cc; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            margin-top: 20px;
+        }
+        button:hover { background: #0052a3; }
+        #output { 
+            margin-top: 30px; 
+            padding: 20px; 
+            border: 1px solid #ccc; 
+            background: #f8f9fa; 
+            min-height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Checker CTV Bas Risque – Radiothérapie Tête & Cou</h1>
+    <p>Entrez les infos → cliquez sur Générer pour voir les zones à ne pas oublier (ex. fosse ptérygo-palatine).</p>
+
+    <form id="ctvForm">
+        <label>Localisation primitive :</label>
+        <select id="location">
+            <option value="">Sélectionnez</option>
+            <option value="npc">Nasopharynx (NPC)</option>
+            <option value="sinus">Sinus maxillaire / ethmoïde</option>
+            <option value="salivary">Glandes salivaires (ex. ACC)</option>
+            <option value="oral">Oropharynx / cavité orale</option>
+            <option value="skin">Cutané visage</option>
+        </select>
+
+        <label>Stade T :</label>
+        <select id="tStage">
+            <option value="">Sélectionnez</option>
+            <option value="t1t2">T1-T2 (précoce)</option>
+            <option value="t3t4">T3-T4 (avancé)</option>
+        </select>
+
+        <label>Extensions / Facteurs de risque :</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="pni"> PNI (invasion périneurale)</label>
+            <label><input type="checkbox" id="v2"> Atteinte V2 (nerf maxillaire)</label>
+            <label><input type="checkbox" id="infratemp"> Fosse infratemporale / muscles ptérygoïdiens</label>
+            <label><input type="checkbox" id="palate"> Palais dur/mou</label>
+            <label><input type="checkbox" id="bilateral"> Bilatéral / médian</label>
+        </div>
+
+        <button type="button" onclick="generateRecommendations()">Générer Recommandations</button>
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+        function generateRecommendations() {
+            const location = document.getElementById('location').value;
+            const tStage = document.getElementById('tStage').value;
+            const pni = document.getElementById('pni').checked;
+            const v2 = document.getElementById('v2').checked;
+            const infratemp = document.getElementById('infratemp').checked;
+            const palate = document.getElementById('palate').checked;
+            const bilateral = document.getElementById('bilateral').checked;
+
+            let output = '<h2>Recommandations pour CTV Bas Risque</h2><ul>';
+
+            // Règles pour fosse ptérygo-palatine (on ajoutera d'autres zones après)
+            if (location === 'npc') {
+                output += '<li><strong>Fosse ptérygo-palatine :</strong> ';
+                if (tStage === 't3t4' || bilateral) {
+                    output += 'Inclure <strong>bilatéralement</strong> (risque subclinical élevé via foramen sphénopalatin). Dose typique 54-60 Gy.</li>';
+                } else if (tStage === 't1t2') {
+                    output += 'Inclure <strong>ipsilatéralement</strong>. Controlatérale souvent omissible si excentrique + N0/N1.</li>';
+                }
+            }
+
+            if (pni || v2) {
+                output += '<li><strong>Fosse ptérygo-palatine + trajet nerveux :</strong> Obligatoire si PNI ou atteinte V2. Couvrir jusqu’au foramen rotundum ± sinus caverneux (surtout ACC ou SCC avec PNI).</li>';
+            }
+
+            if (infratemp || palate) {
+                output += '<li><strong>Fosse ptérygo-palatine ipsilatérale :</strong> Inclure avec marge 5-10 mm si extension locale aux muscles ptérygoïdiens, palais ou fosse infratemporale.</li>';
+            }
+
+            if (!location) {
+                output += '<li>Sélectionnez une localisation pour plus de précision.</li>';
+            }
+
+            output += '</ul>';
+            output += '<p><small><strong>Attention :</strong> Ceci est une aide indicative basée sur guidelines (Lee 2018, EORTC, NCCN). Toujours valider en RCP / avec votre équipe.</small></p>';
+
+            document.getElementById('output').innerHTML = output;
+        }
+    </script>
+</body>
+</html>
